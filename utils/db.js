@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
-const logger = require('./logger');
+const { DB_CONNECTED, ERR_DB_CONNECTION } = require('../constant');
+
 const connectDatabase = async (url) => {
   mongoose.set('strictQuery', true);
+  mongoose.set('strictPopulate', false);
   try {
     const connect = await mongoose.connect(url);
-    logger.info(`Successfully connected to ${connect.connection.host}`);
+    logger.info(` ${DB_CONNECTED} ${connect.connection.host}`);
   } catch (err) {
-    logger.error('A problem occured while connecting to the datbase', err);
+    logger.error(`${ERR_DB_CONNECTION} ${err.message}`);
   }
 };
 

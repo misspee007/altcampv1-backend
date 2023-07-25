@@ -1,0 +1,112 @@
+[
+  {
+    "_id": "f48bded06c714ab2db26afc4",
+    "firstName": "Benny",
+    "lastName": "Howe",
+    "email": "Benny_Howe@getnada.com",
+    "password": "8XLxWgzXSPh9ABS!",
+    "track": "Product Management",
+    "accountType": "Student",
+    "profilePicture": "",
+    "owner": "3e469f456fcb9104e6eb8a84"
+  },
+  {
+    "_id": "d7aebfdadd09c1db42abe3c4",
+    "firstName": "Mack",
+    "lastName": "Marvin",
+    "email": "Mack80@getnada.com",
+    "password": "HwEzG1pm4JeR_17!",
+    "track": "Data Engineering",
+    "accountType": "Student",
+    "profilePicture": "",
+    "owner": "ad03b17a919fac29599024a1"
+  },
+  {
+    "_id": "cf5eb0beed7ccf6aac8731df",
+    "firstName": "Darryl",
+    "lastName": "Kshlerin",
+    "email": "Darryl21@getnada.com",
+    "password": "GP6JGWt5fKh1rU0!",
+    "track": "Data Science",
+    "accountType": "Student",
+    "profilePicture": "",
+    "owner": "e826bb2dd56bf53da1c5b616"
+  },
+  {
+    "_id": "c5dfc38b35a8dda8abc311ab",
+    "firstName": "Phyllis",
+    "lastName": "Osinski",
+    "email": "Phyllis87@getnada.com",
+    "password": "h8RPF3gEcy0nvX2!",
+    "track": "Product Marketing",
+    "accountType": "Student",
+    "profilePicture": "",
+    "owner": "afb3d0ced9c5c4cecbf5b8fc"
+  },
+  {
+    "_id": "5cfe8e39796a42feee77deff",
+    "firstName": "Audrey",
+    "lastName": "Marks",
+    "email": "Audrey_Marks39@getnada.com",
+    "password": "LqoJg1PxRgfV6mf!",
+    "track": "Product Management",
+    "accountType": "Mentor",
+    "profilePicture": "",
+    "owner": "bacbc27f3dfd0dcba587760f"
+  },
+  {
+    "_id": "adbdff05abe7cb81ecbecee5",
+    "firstName": "Harvey",
+    "lastName": "Lowe",
+    "email": "Harvey.Lowe40@getnada.com",
+    "password": "KfWyoxVAGY6z5oF!",
+    "track": "Product Design",
+    "accountType": "Mentor",
+    "profilePicture": "",
+    "owner": "523a63a9eaaecbe1c3b71b7e"
+  },
+  {
+    "_id": "33d1e9bb1f00e8e2739fe855",
+    "firstName": "Tony",
+    "lastName": "Herzog",
+    "email": "Tony27@getnada.com",
+    "password": "jhqe9eQU1ivP_3_!",
+    "track": "Frontend Engineering",
+    "accountType": "Mentor",
+    "profilePicture": "",
+    "owner": "79919bdba8bdd1caf9a0d1dc"
+  },
+  {
+    "_id": "ec6dee8d1f87bd45fa225e7f",
+    "firstName": "Alfred",
+    "lastName": "Kerluke",
+    "email": "Alfred24@getnada.com",
+    "password": "u0BXge50EPVBcb1!",
+    "track": "Backend Engineering",
+    "accountType": "Mentor",
+    "profilePicture": "",
+    "owner": "1b7e7ae63afbf3327fd9cbcb"
+  },
+  {
+    "_id": "9ed7b0968d5fbedba49df9b6",
+    "firstName": "Santiago",
+    "lastName": "Hegmann",
+    "email": "Santiago45@getnada.com",
+    "password": "AZQTHXISkYUvqu0Q!",
+    "track": "Product Design",
+    "accountType": "Mentor",
+    "profilePicture": "",
+    "owner": "c3cedab3448e06cad589bdd0"
+  },
+  {
+    "_id": "4bcebfd7489feca57be23aff",
+    "firstName": "Esther",
+    "lastName": "Purdy",
+    "email": "Esther_Purdy28@getnada.com",
+    "password": "O7WEpToz6x5Aor3!",
+    "track": "Data Science",
+    "accountType": "Student",
+    "profilePicture": "",
+    "owner": "111a78e0cf6c2af8be4ab835"
+  }
+]

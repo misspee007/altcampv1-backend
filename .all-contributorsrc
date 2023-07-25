@@ -1,0 +1,111 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "misspee007",
+      "name": "Precious Abubakar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71160347?v=4",
+      "profile": "http://thepda.tech",
+      "contributions": [
+        "code",
+        "test",
+        "maintenance",
+        "review"
+      ]
+    },
+    {
+      "login": "tobisupreme",
+      "name": "Tobi Balogun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98078707?v=4",
+      "profile": "https://github.com/tobisupreme",
+      "contributions": [
+        "maintenance",
+        "code",
+        "test",
+        "review"
+      ]
+    },
+    {
+      "login": "jhhornn",
+      "name": "Awosise Oluwaseun",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66667958?v=4",
+      "profile": "https://github.com/jhhornn",
+      "contributions": [
+        "code",
+        "test",
+        "review"
+      ]
+    },
+    {
+      "login": "Boye95",
+      "name": "Samuel Adeboye Folaranmi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/74235313?v=4",
+      "profile": "https://boyei.tech/",
+      "contributions": [
+        "doc",
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "Skywonda",
+      "name": "skyreal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/102043619?v=4",
+      "profile": "https://emerge-testing.vercel.app/signup",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "iamaamunir",
+      "name": "Munir Abdullahi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94959280?v=4",
+      "profile": "https://github.com/iamaamunir",
+      "contributions": [
+        "ideas",
+        "review",
+        "doc"
+      ]
+    },
+    {
+      "login": "AnthoniaNwanya",
+      "name": "Anthonia Nwanya",
+      "avatar_url": "https://avatars.githubusercontent.com/u/105661899?v=4",
+      "profile": "https://github.com/AnthoniaNwanya",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Arndy345",
+      "name": "Nonso Andrew Ugbodu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56146728?v=4",
+      "profile": "https://github.com/Arndy345",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "Olatisunkanmi",
+      "name": "Module",
+      "avatar_url": "https://avatars.githubusercontent.com/u/86102079?v=4",
+      "profile": "https://linktr.ee/olatisun",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "altcampv1-backend",
+  "projectOwner": "AltCamp",
+  "commitType": "docs"
+}
