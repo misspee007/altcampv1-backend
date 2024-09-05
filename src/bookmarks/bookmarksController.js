@@ -29,8 +29,19 @@ const getAllBookmarks = async (req, res) => {
   new responseHandler(res, data, 200, RESPONSE_MESSAGE.SUCCESS, meta);
 };
 
+const deleteBookmark = async (req, res) => {
+  const { postId } = req.query;
+
+  const deletedBookmark = await bookmarksService.deleteBookmark({
+    author: req.user._id,
+    postId,
+  });
+
+  new responseHandler(res, deletedBookmark, 200, RESPONSE_MESSAGE.SUCCESS);
+};
+
 const createBookmark = async (req, res) => {
-  const payload = { ...req.body };
+  const { postId, postType } = req.query;
   req.query.isPaginated = false;
   const { data: bookmarks } = await bookmarksService.getBookmarks(
     req.user._id,
@@ -38,7 +49,7 @@ const createBookmark = async (req, res) => {
   );
 
   const bookmarkExists = bookmarks.some(
-    (bookmark) => bookmark.post._id.toString() === payload.postId
+    (bookmark) => bookmark.post?._id.toString() === postId
   );
 
   if (bookmarkExists) {
@@ -46,8 +57,9 @@ const createBookmark = async (req, res) => {
   }
 
   const newBookmark = await bookmarksService.createBookmark({
-    ...payload,
-    author: req.user._id,
+    post: postId,
+    postType,
+    owner: req.user._id,
   });
 
   new responseHandler(res, newBookmark, 201, RESPONSE_MESSAGE.SUCCESS);
@@ -75,21 +87,16 @@ const updateBookmark = async (req, res) => {
   new responseHandler(res, updatedBookmark, 200, RESPONSE_MESSAGE.SUCCESS);
 };
 
-const deleteBookmark = async (req, res) => {
-  const bookmarkId = req.params.id;
+const deleteBookmarks = async (req, res) => {
+  const userId = req.user._id;
 
-  const isOwner = await bookmarksService.isBookmarkOwner({
-    userId: req.user._id,
-    bookmarkId,
+  const { bookmarkIds } = req.body;
+  const deletedBookmarks = await bookmarksService.deleteBookmarks({
+    bookmarkIds,
+    userId,
   });
 
-  if (!isOwner) throw new UnAuthorizedError('Unauthorized');
-
-  const deleted = await bookmarksService.deleteBookmark(bookmarkId);
-
-  if (!deleted) throw new NotFoundError('Not Found');
-
-  new responseHandler(res, deleted, 200, RESPONSE_MESSAGE.SUCCESS);
+  new responseHandler(res, deletedBookmarks, 200, RESPONSE_MESSAGE.SUCCESS);
 };
 
 module.exports = {
@@ -98,4 +105,5 @@ module.exports = {
   createBookmark,
   updateBookmark,
   deleteBookmark,
+  deleteBookmarks,
 };

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const postsService = require('./postsService');
 const {
   BadRequestError,
@@ -5,12 +6,16 @@ const {
   UnAuthorizedError,
 } = require('../../utils/customError');
 const responseHandler = require('../../utils/responseHandler');
-const { RESPONSE_MESSAGE } = require('../../constant');
+const { RESPONSE_MESSAGE, MediaProviders } = require('../../constant');
+const TagsService = require('../tags/tagsService');
+const MediaServiceFactory = require('../common/media');
+const { removeFromDisk } = require('../../utils/helper');
+const tagsService = new TagsService();
 
 const getPost = async (req, res) => {
   const postId = req.params.id;
 
-  const post = await postsService.getPost(postId);
+  const post = await postsService.getPost(postId, { userId: req.user?._id });
 
   if (!post) throw new NotFoundError('Not Found');
 
@@ -18,19 +23,74 @@ const getPost = async (req, res) => {
 };
 
 const getAllPosts = async (req, res) => {
-  const { data, meta } = await postsService.getPosts(req);
+  const { tags } = req.query;
+  if (tags) {
+    const tagNames = tags.split(',').map((tag) => tag.trim());
+    const tagIds = await tagsService._getTagId(tagNames);
+    req.query.tags = tagIds;
+  }
+
+  const { data, meta } = await postsService.getPosts(req, {
+    userId: req.user?._id,
+  });
   new responseHandler(res, data, 200, RESPONSE_MESSAGE.SUCCESS, meta);
 };
 
 const createPost = async (req, res) => {
-  const { content } = req.body;
+  let media;
+  let { tags, ...content } = req.body;
+  const user = req.user._id;
 
-  const newPost = await postsService.createPost({
-    content,
-    author: req.user._id,
-  });
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    if (tags) {
+      const tagsInDb = await tagsService.createTags(tags, user, session);
+      tags = tagsInDb.map(({ _id }) => _id);
+    }
 
-  new responseHandler(res, newPost, 201, RESPONSE_MESSAGE.SUCCESS);
+    if (req.files) {
+      const mediaService = MediaServiceFactory.getService(
+        MediaProviders.CLOUDINARY
+      );
+      const mediaInDb = await Promise.all(
+        req.files.map((file) => {
+          return mediaService.saveMedia(
+            {
+              media: file,
+              owner: req.user._id,
+            },
+            session
+          );
+        })
+      );
+
+      media = mediaInDb.map((item) => item._id);
+      Promise.all(
+        req.files.map((file) => {
+          return removeFromDisk(file.path);
+        })
+      );
+    }
+
+    const newPost = await postsService.createPost(
+      {
+        ...content,
+        tags,
+        media,
+        author: req.user._id,
+      },
+      session
+    );
+    await session.commitTransaction();
+
+    new responseHandler(res, newPost, 201, RESPONSE_MESSAGE.SUCCESS);
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 const updatePost = async (req, res) => {
@@ -43,11 +103,15 @@ const updatePost = async (req, res) => {
 
   if (!isAuthor) throw new UnAuthorizedError('Unauthorized');
 
-  const post = { ...req.body };
+  let { tags, ...post } = { ...req.body };
+  if (tags) {
+    const tagsInDb = await tagsService.createTags(tags);
+    tags = tagsInDb.map(({ _id }) => _id);
+  }
 
   const updatedPost = await postsService.updatePost({
     postId,
-    post,
+    post: { ...post, tags },
   });
 
   if (!updatedPost) throw new NotFoundError('Not Found');

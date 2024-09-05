@@ -21,8 +21,8 @@ module.exports = {
   CLIENT_URLS: process.env.CORS_ALLOWED_ORIGINS?.split(',') || [],
 
   EMAIL_TEMPLATES: {
-    EMAIL_VERIFICATION: 'emailVerification',
-    PASSWORD_RESET: 'passwordReset',
+    EMAIL_VERIFICATION: 'emailVerification.hbs',
+    PASSWORD_RESET: 'passwordReset.hbs',
     WELCOME_ADDRESS: 'welcomeAddress',
   },
 
@@ -41,8 +41,22 @@ module.exports = {
     EMAIL_VERIFICATION: 'email_verification',
   },
 
+  MediaProviders: {
+    CLOUDINARY: 'cloudinary',
+  },
+
+  MEDIA_TYPE: {
+    IMAGE: 'image',
+    VIDEO: 'video',
+  },
+
   MEDIA_SIZE_LIMITS: {
     PROFILEPICTURE: 1024 * 512,
+  },
+
+  REDIS: {
+    CONNECTION_ERROR: 'Redis connection error',
+    KEEPING_ALIVE: 'Redis - keeping alive',
   },
 
   VALID_IMAGE_FORMATS: {
@@ -84,6 +98,12 @@ module.exports = {
     NOT_FOUND: (entity) => `${entity} not found!`,
     INVALID_CREDENTIALS: 'Invalid credentials!',
     ALREADY_VERIFIED: 'Email is already verified',
+    NOT_VERIFIED: 'Email is not verified',
+    UNAUTHORIZED: 'Unauthorized',
+  },
+
+  TAG_DETAILS: {
+    NAME: 'name',
   },
 
   TRACKS: {
@@ -96,6 +116,10 @@ module.exports = {
     'PRODUCT-DESIGN': 'Product Design',
     'PRODUCT-MANAGEMENT': 'Product Management',
     'PRODUCT-MARKETING': 'Product Marketing',
+  },
+
+  TRACK_DETAILS: {
+    TRACK: 'track',
   },
 
   AUTH: {

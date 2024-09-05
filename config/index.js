@@ -3,6 +3,7 @@ const root = require('app-root-path');
 
 module.exports = {
   root_path: root.path,
+  uploadPath: `${root.path}/.temp/upload`,
   app: {
     port: process.env.PORT || 8000,
     name: process.env.NAME,
@@ -32,6 +33,9 @@ module.exports = {
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
     refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
     access_token: process.env.GOOGLE_ACCESS_TOKEN,
+  },
+  redis: {
+    url: process.env.REDIS_URL,
   },
   smtpConfig: {
     host: process.env.SMTP_HOST,

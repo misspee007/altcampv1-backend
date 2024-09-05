@@ -1,30 +1,22 @@
-const mongoose = require('mongoose');
+const { model, Schema, Types } = require('mongoose');
 const { sanitiseHTML } = require('../utils/helper');
+const { authorSchema, baseSchema, likeSchema } = require('./schemas');
+const autopopulate = require('mongoose-autopopulate');
 
-const postSchema = new mongoose.Schema(
+const postSchema = new Schema(
   {
-    content: {
-      type: String,
-      required: true,
-    },
-    upvotes: {
-      type: Number,
-      default: 0,
-    },
-    upvotedBy: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: 'Account',
-      },
-    ],
-    author: {
-      type: mongoose.Types.ObjectId,
-      ref: 'Account',
-      required: true,
-    },
     comments: {
-      type: [mongoose.Types.ObjectId],
+      type: [Types.ObjectId],
       ref: 'Comment',
+    },
+    media: {
+      type: [Types.ObjectId],
+      ref: 'Media',
+      autopopulate: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -53,6 +45,11 @@ postSchema.pre('validate', function (next) {
   next();
 });
 
-const Post = mongoose.model('Post', postSchema);
+postSchema.plugin(autopopulate);
+
+const Post = model(
+  'Post',
+  baseSchema.clone().add(postSchema).add(authorSchema).add(likeSchema)
+);
 
 module.exports = Post;

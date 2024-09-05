@@ -10,15 +10,18 @@ const { RESPONSE_MESSAGE } = require('../../constant');
 const getComment = async (req, res) => {
   const { id } = req.params;
 
-  const comments = await commentService.getComment(id);
+  const comments = await commentService.getComment(id, {
+    userId: req.user?._id,
+  });
 
   new responseHandler(res, comments, 200, RESPONSE_MESSAGE.SUCCESS);
 };
 
 const getComments = async (req, res) => {
   const { postId } = req.query;
+  const userId = req.user?._id;
 
-  const comments = await commentService.getComments(postId);
+  const comments = await commentService.getComments(postId, userId);
 
   new responseHandler(res, comments, 200, RESPONSE_MESSAGE.SUCCESS);
 };

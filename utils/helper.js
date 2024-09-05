@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const { JSDOM } = require('jsdom');
 const domPurify = createDomPurify(new JSDOM().window);
 const slugify = require('slugify');
+const { v4 } = require('uuid');
+const { rm } = require('fs');
 
 const createHashedToken = (token) => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -44,17 +46,38 @@ async function verifyPassword(plain, hashed) {
   return await bcrypt.compare(plain, hashed);
 }
 
+async function removeFromDisk(path) {
+  return new Promise((resolve) => {
+    resolve(
+      rm(path, (err) => {
+        if (err) console.error(err);
+      })
+    );
+  });
+}
+
 function tokenExpires(ttl) {
-  const mttl = parseInt(ttl, 10);
-  return `${mttl} minute${mttl === 1 ? 's' : ''}`;
+  const mttl = Math.floor(parseInt(ttl, 10) / 60);
+  return `${mttl} minute${mttl > 1 ? 's' : ''}`;
+}
+
+function generateId() {
+  return v4();
+}
+
+function generate4DigitOTP() {
+  return Math.floor(1000 + Math.random() * 9000);
 }
 
 module.exports = {
   createHashedToken,
   createToken,
+  generate4DigitOTP,
+  generateId,
   generateSlug,
   sanitiseHTML,
   validateCredentials,
   verifyPassword,
   tokenExpires,
+  removeFromDisk,
 };

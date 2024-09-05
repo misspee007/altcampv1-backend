@@ -27,7 +27,6 @@ These instructions will get you a copy of the project up and running on your loc
 - [MongoDB](https://docs.mongodb.com/manual/installation/)
 - [Git](https://git-scm.com/downloads)
 - [npm](https://www.npmjs.com/get-npm)
-- A winning attitude 🤩
 
 ### Development Setup
 

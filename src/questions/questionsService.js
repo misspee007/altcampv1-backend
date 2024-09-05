@@ -1,128 +1,114 @@
-const { AUTHOR_DETAILS } = require('../../constant');
 const { Question } = require('../../model');
+const { addIsBookmarkedField } = require('../bookmarks/bookmarksService');
 const { apiFeatures } = require('../common');
 
-const getQuestions = async ({ query }) => {
-  const questionsQuery = Question.find({}).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+const getQuestions = async ({ query } = {}, { userId }) => {
+  const questionsQuery = Question.find({});
   const questions = await new apiFeatures(questionsQuery, query)
     .filter()
     .sort()
     .paginate();
+
+  if (!userId) {
+    questions.data = questions.data.map((post) => {
+      return { ...post.toJSON(), isBookmarked: false };
+    });
+    return questions;
+  }
+  questions.data = await addIsBookmarkedField(questions.data, userId);
   return questions;
 };
 
-const getQuestion = async (questionId) => {
-  const question = await Question.findById(questionId).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+const getQuestion = async (questionId, { userId }) => {
+  let question = await Question.findById(questionId);
 
+  if (!userId) {
+    question = { ...question.toJSON(), isBookmarked: false };
+    return question;
+  }
+
+  question = await addIsBookmarkedField(question, userId);
   return question;
 };
 
 const createQuestion = async (question) => {
   const newQuestion = await Question.create(question);
-  await newQuestion.populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
   return newQuestion;
 };
 
 const updateQuestion = async ({ questionId, question }) => {
-  const updatedQuestion = await Question.findByIdAndUpdate(
-    questionId,
-    question,
-    {
-      new: true,
-      runValidators: true,
-      context: 'query',
-    }
-  ).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
+  let updatedQuestion = await Question.findByIdAndUpdate(questionId, question, {
+    new: true,
+    runValidators: true,
+    context: 'query',
   });
 
+  updatedQuestion = await addIsBookmarkedField(
+    updatedQuestion,
+    updatedQuestion?.author?._id
+  );
   return updatedQuestion;
 };
 
 const deleteQuestion = async (questionId) => {
-  const question = await Question.findByIdAndDelete(questionId).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
-
+  const question = await Question.findByIdAndDelete(questionId);
   return question;
 };
 
 const isQuestionAuthor = async ({ userId, questionId }) => {
   const { author } = await Question.findById(questionId);
-  return userId.toString() === author.toString();
+  return userId.toString() === author._id.toString();
 };
 
 const upvoteQuestion = async ({ userId, questionId }) => {
-  const question = await Question.findById(questionId).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+  let question = await Question.findById(questionId);
   if (!question) {
     return false;
   }
 
   if (question.upvotedBy.includes(userId)) {
-    question.upvotes--;
     const searchIndex = question.upvotedBy.indexOf(userId);
     question.upvotedBy.splice(searchIndex, 1);
-
-    await question.save();
-
-    return question;
+  } else {
+    question.upvotedBy.push(userId);
   }
+  question.upvotes = question.upvotedBy.length;
 
   if (question.downvotedBy.includes(userId)) {
-    question.downvotes--;
     const searchIndex = question.downvotedBy.indexOf(userId);
     question.downvotedBy.splice(searchIndex, 1);
+    question.downvotes = question.downvotedBy.length;
   }
 
-  question.upvotes++;
-  question.upvotedBy.push(userId);
   await question.save();
+  question = await addIsBookmarkedField(question, userId);
 
   return question;
 };
 
 const downvoteQuestion = async ({ userId, questionId }) => {
-  const question = await Question.findById(questionId).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+  let question = await Question.findById(questionId);
   if (!question) {
     return false;
   }
 
   if (question.downvotedBy.includes(userId)) {
-    question.downvotes--;
     const searchIndex = question.downvotedBy.indexOf(userId);
     question.downvotedBy.splice(searchIndex, 1);
-
-    await question.save();
-
-    return question;
+    question.downvotes = question.downvotedBy.length;
+  } else {
+    question.downvotedBy.push(userId);
+    question.downvotes = question.downvotedBy.length;
   }
 
   if (question.upvotedBy.includes(userId)) {
-    question.upvotes--;
     const searchIndex = question.upvotedBy.indexOf(userId);
     question.upvotedBy.splice(searchIndex, 1);
+    question.upvotes = question.upvotedBy.length;
   }
 
-  question.downvotes++;
-  question.downvotedBy.push(userId);
   await question.save();
+  question = await addIsBookmarkedField(question, userId);
 
   return question;
 };

@@ -1,39 +1,47 @@
 const router = require('express').Router();
-const { verifyUser } = require('../../middleware/authenticate');
+const {
+  authEmailIsVerified,
+  authOptional,
+} = require('../../middleware/authenticate');
 const validatorMiddleware = require('../../middleware/validator');
 const validator = require('express-joi-validation').createValidator({
   passError: true,
 });
-const {
-  createCommentValidator,
-  getCommentValidator,
-  getCommentsValidator,
-  updateCommentValidator,
-} = require('./commentsValidator');
+const { CommentsValidator } = require('./commentsValidator');
 const comments = require('./commentsController');
 const limiter = require('../../middleware/rateLimit');
 
 router
   .route('/')
-  .get(validator.query(getCommentsValidator), comments.getComments)
+  .get(
+    authOptional,
+    validator.query(CommentsValidator.validateGetComments()),
+    comments.getComments
+  )
   .post(
     limiter(),
-    verifyUser,
-    validatorMiddleware(createCommentValidator),
+    authEmailIsVerified,
+    validatorMiddleware(CommentsValidator.validateCreateComment()),
     comments.createComment
   );
 
-router.route('/:id/upvote').patch(verifyUser, comments.upvoteComment);
+router.route('/:id/upvote').patch(authEmailIsVerified, comments.upvoteComment);
 
-router.route('/:id/downvote').patch(verifyUser, comments.downvoteComment);
+router
+  .route('/:id/downvote')
+  .patch(authEmailIsVerified, comments.downvoteComment);
 
 router
   .route('/:id')
-  .get(validator.params(getCommentValidator), comments.getComment)
+  .get(
+    authOptional,
+    validator.params(CommentsValidator.validateGetComment()),
+    comments.getComment
+  )
   .patch(
     limiter(),
-    verifyUser,
-    validatorMiddleware(updateCommentValidator),
+    authEmailIsVerified,
+    validatorMiddleware(CommentsValidator.validateUpdateComment()),
     comments.updateComment
   );
 

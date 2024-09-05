@@ -1,23 +1,31 @@
-const { AUTHOR_DETAILS } = require('../../constant');
 const { Answer, Question } = require('../../model');
+const { addIsBookmarkedField } = require('../bookmarks/bookmarksService');
 
-const getAnswer = async (id) => {
-  const answers = await Answer.find({ id }).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+const getAnswer = async (id, { userId }) => {
+  let answer = await Answer.find({ id });
 
-  return answers;
+  if (!userId) {
+    answer = { ...answer.toJSON(), isBookmarked: false };
+    return answer;
+  }
+
+  answer = await addIsBookmarkedField(answer, userId);
+  return answer;
 };
 
-const getAnswers = async (questionId) => {
-  const answers = await Answer.find({
+const getAnswers = async (questionId, userId) => {
+  let answers = await Answer.find({
     question: questionId,
-  }).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
   });
 
+  if (!userId) {
+    answers = answers.map((answer) => {
+      return { ...answer.toJSON(), isBookmarked: false };
+    });
+    return answers;
+  }
+
+  answers = await addIsBookmarkedField(answers, userId);
   return answers;
 };
 
@@ -30,16 +38,12 @@ const createAnswer = async (answer) => {
 
   await question.save();
   await newAnswer.save();
-  await newAnswer.populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
 
   return newAnswer;
 };
 
 const updateAnswer = async (id, { content }) => {
-  const updatedAnswer = await Answer.findByIdAndUpdate(
+  let updatedAnswer = await Answer.findByIdAndUpdate(
     id,
     { content },
     {
@@ -47,81 +51,71 @@ const updateAnswer = async (id, { content }) => {
       runValidators: true,
       context: 'query',
     }
-  ).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+  );
+
+  updatedAnswer = await addIsBookmarkedField(
+    updatedAnswer,
+    updatedAnswer?.author?._id
+  );
 
   return updatedAnswer;
 };
 
 const upvoteAnswer = async ({ id, userId }) => {
-  const answer = await Answer.findById(id).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+  let answer = await Answer.findById(id);
   if (!answer) {
     return false;
   }
 
   if (answer.upvotedBy.includes(userId)) {
-    answer.upvotes--;
     const searchIndex = answer.upvotedBy.indexOf(userId);
     answer.upvotedBy.splice(searchIndex, 1);
-
-    await answer.save();
-
-    return answer;
+  } else {
+    answer.upvotedBy.push(userId);
   }
+  answer.upvotes = answer.upvotedBy.length;
 
   if (answer.downvotedBy.includes(userId)) {
-    answer.downvotes--;
     const searchIndex = answer.downvotedBy.indexOf(userId);
     answer.downvotedBy.splice(searchIndex, 1);
+    answer.downvotes = answer.downvotedBy.length;
   }
 
-  answer.upvotes++;
-  answer.upvotedBy.push(userId);
   await answer.save();
+  answer = await addIsBookmarkedField(answer, userId);
 
   return answer;
 };
 
 const downvoteAnswer = async ({ id, userId }) => {
-  const answer = await Answer.findById(id).populate({
-    path: 'author',
-    select: Object.values(AUTHOR_DETAILS),
-  });
+  let answer = await Answer.findById(id);
   if (!answer) {
     return false;
   }
 
   if (answer.downvotedBy.includes(userId)) {
-    answer.downvotes--;
     const searchIndex = answer.downvotedBy.indexOf(userId);
     answer.downvotedBy.splice(searchIndex, 1);
-
-    await answer.save();
-
-    return answer;
+  } else {
+    answer.downvotedBy.push(userId);
   }
+  answer.downvotes = answer.downvotedBy.length;
 
   if (answer.upvotedBy.includes(userId)) {
-    answer.upvotes--;
     const searchIndex = answer.upvotedBy.indexOf(userId);
     answer.upvotedBy.splice(searchIndex, 1);
+    answer.upvotes = answer.upvotedBy.length;
   }
 
-  answer.downvotes++;
-  answer.downvotedBy.push(userId);
   await answer.save();
+  answer = await addIsBookmarkedField(answer, userId);
 
   return answer;
 };
 
 const isAnswerAuthor = async ({ userId, answerId }) => {
   const { author } = await Answer.findById(answerId);
-  return userId.toString() === author.toString();
+  return userId.toString() === author._id.toString();
 };
 
 module.exports = {

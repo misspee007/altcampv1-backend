@@ -1,6 +1,11 @@
 const { apiFeatures } = require('../common');
-const { AUTHOR_DETAILS, POST_DETAILS } = require('../../constant');
+const {
+  AUTHOR_DETAILS,
+  POST_DETAILS,
+  RESPONSE_MESSAGE,
+} = require('../../constant');
 const { Bookmark } = require('../../model');
+const { NotFoundError } = require('../../utils/customError');
 
 const getBookmarks = async (owner, { query }) => {
   const bookmarksQuery = Bookmark.find({ owner })
@@ -55,13 +60,8 @@ const getBookmark = async (bookmarkId) => {
   return bookmark;
 };
 
-const createBookmark = async ({ author, postId, postType, title }) => {
-  const newBookmark = await Bookmark.create({
-    title,
-    postType,
-    post: postId,
-    owner: author,
-  });
+const createBookmark = async (payload) => {
+  const newBookmark = await Bookmark.create(payload);
 
   await newBookmark.populate({
     path: 'owner',
@@ -85,6 +85,21 @@ const createBookmark = async ({ author, postId, postType, title }) => {
   });
 
   return newBookmark;
+};
+
+const deleteBookmark = async ({ author, postId }) => {
+  const bookmarkToDelete = await Bookmark.findOne({
+    owner: author,
+    post: postId,
+  });
+  if (!bookmarkToDelete)
+    throw new NotFoundError(RESPONSE_MESSAGE.NOT_FOUND('Bookmark'));
+
+  const payload = {
+    bookmarkIds: [bookmarkToDelete._id],
+    userId: author,
+  };
+  return await deleteBookmarks(payload);
 };
 
 const updateBookmark = async ({ bookmarkId, bookmark }) => {
@@ -113,23 +128,44 @@ const updateBookmark = async ({ bookmarkId, bookmark }) => {
   return updatedBookmark;
 };
 
-const deleteBookmark = async (bookmarkId) => {
-  const bookmark = await Bookmark.findByIdAndDelete(bookmarkId)
-    .populate({
-      path: 'owner',
-      select: Object.values(AUTHOR_DETAILS),
-    })
-    .populate('post', {
-      content: 1,
-      body: 1,
-    });
+const deleteBookmarks = async ({ bookmarkIds, userId }) => {
+  const deletedBookmarks = await Bookmark.deleteMany({
+    _id: { $in: bookmarkIds },
+    author: userId,
+  });
 
-  return bookmark;
+  return deletedBookmarks;
 };
 
 const isBookmarkOwner = async ({ userId, bookmarkId }) => {
   const { owner } = await Bookmark.findById(bookmarkId);
   return userId.toString() === owner.toString();
+};
+
+const addIsBookmarkedField = async (resources, userId) => {
+  const isArray = Array.isArray(resources);
+  let _resources = isArray ? [...resources] : [resources];
+
+  try {
+    const resourceIds = _resources.map((resource) => resource._id.toString());
+
+    let bookmarks = await Bookmark.find({
+      id: { $in: [resourceIds] },
+      owner: userId,
+    });
+    bookmarks = bookmarks.map((each) => each.post.toString());
+
+    _resources = _resources.map((resource) => {
+      if (bookmarks.includes(resource.id)) {
+        return { ...resource.toJSON(), isBookmarked: true };
+      } else {
+        return { ...resource.toJSON(), isBookmarked: false };
+      }
+    });
+    return isArray ? _resources : _resources[0];
+  } catch (error) {
+    return resources;
+  }
 };
 
 module.exports = {
@@ -138,5 +174,7 @@ module.exports = {
   createBookmark,
   updateBookmark,
   deleteBookmark,
+  deleteBookmarks,
   isBookmarkOwner,
+  addIsBookmarkedField,
 };
